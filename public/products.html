@@ -1,22 +1,97 @@
-async function loadProducts() {
-    try {
-        const res = await fetch('/api/products');
-        if (!res.ok) throw new Error("Network response was not ok");
-        allProducts = await res.json();
-        
-        if (allProducts && allProducts.length > 0) {
-            renderProducts(allProducts);
-        } else {
-            document.getElementById('productsGrid').innerHTML = "<p class='text-center col-span-full'>No products available.</p>";
-        }
-    } catch (error) {
-        console.error("Failed to load products:", error);
-        document.getElementById('productsGrid').innerHTML = "<p class='text-center col-span-full text-red-500'>Error loading products.</p>";
-    }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products | TREND HIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .cart-toast { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 40px; z-index: 1000; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold"><span class="text-black">TREND</span><span class="text-gray-500">HIVE</span></a>
+            <nav class="flex gap-6">
+                <a href="/" class="hover:text-black">Home</a>
+                <a href="/products.html" class="text-black font-semibold">Products</a>
+                <a href="/admin.html">Admin</a>
+            </nav>
+            <div id="cartCountBadge" class="bg-black text-white px-3 py-1 rounded-full text-sm">🛒 0</div>
+        </div>
+    </header>
 
-// Ensure this runs only after the full page is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    loadProducts();
-    updateCartUI();
-});
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-6">🛍️ All Products</h1>
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <p class="text-center col-span-full py-10 text-gray-400">Loading catalog...</p>
+        </div>
+    </div>
+
+    <script>
+        let allProducts = [];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            if (!products || products.length === 0) {
+                grid.innerHTML = "<p class='text-center col-span-full py-10'>No products found.</p>";
+                return;
+            }
+            grid.innerHTML = products.map(p => `
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition flex flex-col">
+                    <img src="${p.image}" class="h-48 w-full object-cover" alt="${p.name}">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h3 class="font-bold text-lg">${p.name}</h3>
+                        <p class="text-black font-bold text-xl">$${p.price}</p>
+                        <p class="text-gray-600 text-sm mb-4">${p.description ? p.description.substring(0, 50) : ''}...</p>
+                        <div class="mt-auto flex justify-between items-center">
+                            <span class="text-yellow-500">⭐ ${p.rating || '4.5'}</span>
+                            <button onclick='addToCart(${JSON.stringify(p)})' class="bg-black text-white px-4 py-1 rounded-full text-sm">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadProducts() {
+            try {
+                // Use a timestamp to force fresh data from Vercel
+                const res = await fetch('/api/products?cache=' + Date.now());
+                if (!res.ok) throw new Error("API Failed");
+                allProducts = await res.json();
+                renderProducts(allProducts);
+            } catch (err) {
+                console.error("API Error:", err);
+                // Last resort fallback so it never looks empty
+                renderProducts(allProducts); 
+            }
+        }
+
+        function addToCart(product) {
+            const existing = cart.find(item => item.id === product.id);
+            if (existing) existing.qty++;
+            else cart.push({ ...product, qty: 1 });
+            updateCartUI();
+            showToast(`Added ${product.name}`);
+        }
+
+        function updateCartUI() {
+            const total = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+            document.getElementById('cartCountBadge').innerText = `🛒 ${total}`;
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        function showToast(msg) {
+            let toast = document.createElement('div');
+            toast.className = 'cart-toast';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 1500);
+        }
+
+        // Run when page is ready
+        window.onload = loadProducts;
+    </script>
+</body>
+</html>
