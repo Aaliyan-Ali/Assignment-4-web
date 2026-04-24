@@ -1,172 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Products | TREND HIVE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .cart-toast { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 40px; z-index: 1000; }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <header class="bg-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold"><span class="text-black">TREND</span><span class="text-gray-500">HIVE</span></a>
-            <div class="flex gap-6">
-                <a href="/" class="hover:text-black">Home</a>
-                <a href="/products.html" class="text-black font-semibold">Products</a>
-                <a href="/admin.html">Admin</a>
-            </div>
-            <div id="cartCountBadge" class="bg-black text-white px-3 py-1 rounded-full text-sm">🛒 0</div>
-        </div>
-    </header>
-
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-6">🛍️ All Products (USD)</h1>
-        <!-- Search & Filter -->
-        <div class="flex flex-wrap gap-4 mb-8">
-            <input type="text" id="searchInput" placeholder="🔍 Search product..." class="border p-2 rounded-lg w-64">
-            <select id="categorySelect" class="border p-2 rounded-lg">
-                <option value="all">All Categories</option>
-                <option value="clothing">Clothing</option>
-                <option value="electronics">Electronics</option>
-                <option value="footwear">Footwear</option>
-                <option value="accessories">Accessories</option>
-                <option value="fitness">Fitness</option>
-            </select>
-            <button onclick="resetFilters()" class="bg-gray-700 text-white px-4 rounded-lg">Reset</button>
-        </div>
-        <!-- Products Grid -->
-        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-    </div>
-
-    <!-- Checkout Modal -->
-    <div id="checkoutModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-2xl w-96">
-            <h2 class="text-2xl font-bold mb-4">Complete Delivery</h2>
-            <p id="checkoutProductName" class="mb-2 font-semibold"></p>
-            <input type="text" id="checkoutName" placeholder="Your Name" class="w-full border p-2 rounded mb-3">
-            <textarea id="checkoutComment" placeholder="Add a comment (optional)" class="w-full border p-2 rounded mb-4"></textarea>
-            <button onclick="confirmDelivery()" class="bg-black text-white w-full py-2 rounded">Place Order</button>
-            <button onclick="closeCheckoutModal()" class="mt-2 text-gray-500 w-full">Cancel</button>
-        </div>
-    </div>
-
-    <footer class="text-center py-6 bg-white border-t mt-12">
-        <p class="text-gray-500">© TREND HIVE STORE — Style never sleeps</p>
-    </footer>
-
-    <script>
-        let allProducts = [];
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let currentCheckoutProduct = null;
-
-        function updateCartUI() {
-            const total = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCountBadge').innerHTML = `🛒 ${total}`;
-            localStorage.setItem('cart', JSON.stringify(cart));
-        }
-
-        function addToCart(product) {
-            const existing = cart.find(item => item.id === product.id);
-            if (existing) existing.qty++;
-            else cart.push({ ...product, qty: 1 });
-            updateCartUI();
-            showToast(`Added ${product.name} to cart`);
-        }
-
-        function showToast(msg) {
-            let toast = document.createElement('div');
-            toast.className = 'cart-toast';
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 1500);
-        }
-
-        async function loadProducts() {
-            const res = await fetch('/api/products');
-            allProducts = await res.json();
+async function loadProducts() {
+    try {
+        const res = await fetch('/api/products');
+        if (!res.ok) throw new Error("Network response was not ok");
+        allProducts = await res.json();
+        
+        if (allProducts && allProducts.length > 0) {
             renderProducts(allProducts);
+        } else {
+            document.getElementById('productsGrid').innerHTML = "<p class='text-center col-span-full'>No products available.</p>";
         }
+    } catch (error) {
+        console.error("Failed to load products:", error);
+        document.getElementById('productsGrid').innerHTML = "<p class='text-center col-span-full text-red-500'>Error loading products.</p>";
+    }
+}
 
-        function renderProducts(products) {
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = products.map(p => `
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
-                    <img src="${p.image}" class="h-48 w-full object-cover" alt="${p.name}">
-                    <div class="p-4">
-                        <h3 class="font-bold text-lg">${p.name}</h3>
-                        <p class="text-black font-bold text-xl">$${p.price}</p>
-                        <p class="text-gray-600 text-sm">${p.description.substring(0, 60)}</p>
-                        <div class="flex justify-between items-center mt-3">
-                            <span class="text-yellow-500">⭐ ${p.rating}</span>
-                            <div class="space-x-2">
-                                <button onclick='addToCart(${JSON.stringify(p)})' class="bg-gray-800 text-white px-3 py-1 rounded-full text-sm">Cart</button>
-                                <button onclick='buyNow(${JSON.stringify(p)})' class="bg-black text-white px-3 py-1 rounded-full text-sm">Buy Now</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function buyNow(product) {
-            currentCheckoutProduct = product;
-            document.getElementById('checkoutProductName').innerText = product.name + ' - $' + product.price;
-            document.getElementById('checkoutModal').classList.remove('hidden');
-            document.getElementById('checkoutModal').classList.add('flex');
-        }
-
-        async function confirmDelivery() {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) {
-                alert('Please login first');
-                closeCheckoutModal();
-                return;
-            }
-            const name = document.getElementById('checkoutName').value || user.name;
-            const comment = document.getElementById('checkoutComment').value || "Great product!";
-            const orderData = {
-                productId: currentCheckoutProduct.id,
-                productName: currentCheckoutProduct.name,
-                productImage: currentCheckoutProduct.image,
-                userEmail: user.email,
-                customerName: name,
-                comment: comment
-            };
-            const res = await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-            if (res.ok) {
-                alert('Order placed! Delivery will be arranged.');
-                closeCheckoutModal();
-            } else alert('Error');
-        }
-
-        function closeCheckoutModal() {
-            document.getElementById('checkoutModal').classList.add('hidden');
-            document.getElementById('checkoutModal').classList.remove('flex');
-        }
-
-        function filterProducts() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const category = document.getElementById('categorySelect').value;
-            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(search) && (category === 'all' || p.category === category));
-            renderProducts(filtered);
-        }
-
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('categorySelect').value = 'all';
-            renderProducts(allProducts);
-        }
-
-        document.getElementById('searchInput').addEventListener('input', filterProducts);
-        document.getElementById('categorySelect').addEventListener('change', filterProducts);
-        loadProducts();
-        updateCartUI();
-    </script>
-</body>
-</html>
+// Ensure this runs only after the full page is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    loadProducts();
+    updateCartUI();
+});
