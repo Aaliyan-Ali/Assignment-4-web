@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TREND HIVE STORE | Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Black & White Theme */
+        body {
+            background: #f8f9fa;
+            color: #1a1a1a;
+        }
+        /* Slider container */
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+            background: #000;
+        }
+        .slides-wrapper {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slide {
+            min-width: 100%;
+            transition: opacity 0.5s;
+        }
+        .slide-video, .slide-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+        }
+        .slide-caption {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            font-size: 1.2rem;
+        }
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            padding: 0 15px;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+        }
+        .slider-btn:hover { background: black; }
+        .prev { left: 10px; }
+        .next { right: 10px; }
+        .dots {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .dot.active { background: white; }
+    </style>
+</head>
+<body class="font-sans">
+
+    <!-- Header (same as before, no bee logo) -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="text-3xl font-extrabold tracking-tight">
+                <span class="text-black">TREND</span><span class="text-gray-500">HIVE</span>
+                <span class="text-xs align-top text-gray-400">STORE</span>
+            </div>
+            <nav class="space-x-6 text-gray-700 font-medium">
+                <a href="/" class="hover:text-black">Home</a>
+                <a href="/products.html" class="hover:text-black">Products</a>
+                <a href="/admin.html" class="hover:text-black">Admin</a>
+            </nav>
+            <div class="space-x-3">
+                <button onclick="openModal('login')" class="border border-black text-black px-5 py-2 rounded-full hover:bg-black hover:text-white transition">Login</button>
+                <button onclick="openModal('signup')" class="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login/Signup Modals (same as before) -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl w-96">
+            <h2 class="text-2xl font-bold mb-4">Login</h2>
+            <input type="email" id="loginEmail" placeholder="Email" class="w-full border p-2 rounded mb-3">
+            <input type="password" id="loginPassword" placeholder="Password" class="w-full border p-2 rounded mb-4">
+            <button onclick="login()" class="bg-black text-white w-full py-2 rounded">Login</button>
+            <button onclick="closeModal('login')" class="mt-2 text-gray-500 w-full">Cancel</button>
+        </div>
+    </div>
+    <div id="signupModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl w-96">
+            <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+            <input type="text" id="signupName" placeholder="Full Name" class="w-full border p-2 rounded mb-3">
+            <input type="email" id="signupEmail" placeholder="Email" class="w-full border p-2 rounded mb-3">
+            <input type="password" id="signupPassword" placeholder="Password" class="w-full border p-2 rounded mb-4">
+            <button onclick="signup()" class="bg-black text-white w-full py-2 rounded">Create Account</button>
+            <button onclick="closeModal('signup')" class="mt-2 text-gray-500 w-full">Cancel</button>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-16">
+
+        <!-- ========== VIDEO + IMAGE SLIDER ========== -->
+        <div class="slider-container">
+            <div class="slides-wrapper" id="slidesWrapper">
+                <!-- Slide 1: Video -->
+                <div class="slide" data-type="video">
+                    <video class="slide-video" muted loop playsinline>
+                        <source src="1.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-caption">🔥 New Arrivals: Explore Now</div>
+                </div>
+                <!-- Slide 2: Image -->
+                <div class="slide" data-type="image">
+                    <img class="slide-image" src="2.jpg" alt="Fashion sale">
+                    <div class="slide-caption">👕 Trendy Clothing – Up to 40% Off</div>
+                </div>
+                <!-- Slide 3: Video -->
+                <div class="slide" data-type="video">
+                    <video class="slide-video" muted loop playsinline>
+                        <source src="3.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-caption">🎧 Best Electronics Deals</div>
+                </div>
+                <!-- Slide 4: Image (extra) -->
+                <div class="slide" data-type="image">
+                    <img class="slide-image" src="4.jpg" alt="Sneakers">
+                    <div class="slide-caption">👟 Premium Footwear – Free Shipping</div>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <button class="slider-btn prev" onclick="prevSlide()">❮</button>
+            <button class="slider-btn next" onclick="nextSlide()">❯</button>
+            <!-- Dots -->
+            <div class="dots" id="dotsContainer"></div>
+        </div>
+
+        <!-- The rest of your homepage sections (About, What We Offer, Reviews, Recent Deliveries, FAQs, Footer) -->
+        <!-- Keep everything else exactly as it was in the previous index.html (from "About TREND HIVE" to footer) -->
+        <!-- I'm copying the remaining sections from previous answer to avoid losing them -->
+
+        <!-- About TREND HIVE -->
+        <div class="grid md:grid-cols-2 gap-10 items-center bg-white p-8 rounded-2xl shadow-md">
+            <div>
+                <h2 class="text-4xl font-bold mb-4">About <span class="text-gray-500">TREND HIVE</span></h2>
+                <p class="text-gray-700 leading-relaxed mb-4">Founded in 2025, TREND HIVE is not just a store – it's a movement. We curate the finest fashion, electronics, and accessories from around the globe. Our team of trend spotters works 24/7 to bring you the hottest items before they go mainstream. With over 10,000+ satisfied customers, we pride ourselves on authenticity, quality, and lightning-fast delivery.</p>
+                <p class="text-gray-700">Our mission: <strong>Empower your style without breaking the bank.</strong> Every product is handpicked, tested, and loved.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <img src="https://picsum.photos/id/106/300/200" class="rounded-xl object-cover h-40 w-full" alt="store">
+                <img src="https://picsum.photos/id/133/300/200" class="rounded-xl object-cover h-40 w-full" alt="team">
+                <img src="https://picsum.photos/id/26/300/200" class="rounded-xl object-cover h-40 w-full" alt="products">
+                <img src="https://picsum.photos/id/29/300/200" class="rounded-xl object-cover h-40 w-full" alt="delivery">
+            </div>
+        </div>
+
+        <!-- What We Offer -->
+        <div>
+            <h2 class="text-3xl font-bold text-center mb-8">🔥 What We Offer</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow text-center"><img src="https://picsum.photos/id/20/150/100" class="mx-auto rounded-md mb-3"><h3 class="font-bold">Clothing</h3><p>Jackets, tees, hoodies, denim</p></div>
+                <div class="bg-white p-5 rounded-xl shadow text-center"><img src="https://picsum.photos/id/0/150/100" class="mx-auto rounded-md mb-3"><h3 class="font-bold">Electronics</h3><p>Audio, smart devices, gaming</p></div>
+                <div class="bg-white p-5 rounded-xl shadow text-center"><img src="https://picsum.photos/id/2/150/100" class="mx-auto rounded-md mb-3"><h3 class="font-bold">Footwear & Accessories</h3><p>Sneakers, watches, bags</p></div>
+            </div>
+        </div>
+
+        <!-- Customer Reviews -->
+        <div>
+            <h2 class="text-3xl font-bold text-center mb-8">⭐ Customer Reviews</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow flex gap-4"><img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-16 h-16 rounded-full"><div><p class="italic">"Amazing quality, fast shipping!"</p><p class="font-bold mt-2">– Priya S.</p><div class="text-yellow-500">★★★★★</div></div></div>
+                <div class="bg-white p-5 rounded-xl shadow flex gap-4"><img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-16 h-16 rounded-full"><div><p class="italic">"Best earbuds I've owned."</p><p class="font-bold mt-2">– Rohan K.</p><div class="text-yellow-500">★★★★☆</div></div></div>
+                <div class="bg-white p-5 rounded-xl shadow flex gap-4"><img src="https://randomuser.me/api/portraits/women/45.jpg" class="w-16 h-16 rounded-full"><div><p class="italic">"Love the minimalist backpack!"</p><p class="font-bold mt-2">– Anjali M.</p><div class="text-yellow-500">★★★★★</div></div></div>
+            </div>
+        </div>
+
+        <!-- Recent Deliveries -->
+        <div class="bg-white rounded-2xl p-6 shadow-md">
+            <h2 class="text-3xl font-bold mb-6">🚚 Recent Deliveries</h2>
+            <div id="recentDeliveries" class="space-y-4"></div>
+        </div>
+
+        <!-- FAQs -->
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+            <div class="space-y-4">
+                <h2 class="text-3xl font-bold">❓ Frequently Asked Questions</h2>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">1. How long does delivery take?</summary><p class="mt-2 text-gray-600">Typically 3-5 business days for metro cities, 5-7 for others.</p></details>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">2. Do you ship internationally?</summary><p class="mt-2 text-gray-600">Currently only within the US. International coming soon!</p></details>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">3. What is your return policy?</summary><p class="mt-2 text-gray-600">30-day easy returns. Items must be unused.</p></details>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">4. How can I track my order?</summary><p class="mt-2 text-gray-600">Login and go to "My Orders" (coming soon) or contact support.</p></details>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">5. Do you offer cash on delivery?</summary><p class="mt-2 text-gray-600">Yes, for orders under $200.</p></details>
+                <details class="bg-white p-4 rounded-xl shadow"><summary class="font-bold cursor-pointer">6. How to get discount coupons?</summary><p class="mt-2 text-gray-600">Subscribe to our newsletter for exclusive deals.</p></details>
+            </div>
+            <div class="flex justify-center">
+                <div class="bg-white p-6 rounded-2xl shadow text-center">
+                    <div class="thinking-img mx-auto mb-3" style="background: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop') center/cover; width:80px; height:80px; border-radius:50%;"></div>
+                    <p class="text-gray-500 italic">"Got a question? We're here 24/7!"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Large Footer -->
+        <footer class="bg-black text-white rounded-2xl p-8 mt-12">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div><div class="text-2xl font-bold">TRENDHIVE STORE</div><p class="text-gray-400 text-sm mt-2">Your style, our obsession.</p></div>
+                <div><h4 class="font-bold mb-3">Quick Links</h4><ul class="space-y-1 text-gray-400 text-sm"><li><a href="/" class="hover:text-white">Home</a></li><li><a href="/products.html" class="hover:text-white">Products</a></li><li><a href="/admin.html" class="hover:text-white">Admin</a></li></ul></div>
+                <div><h4 class="font-bold mb-3">Contact</h4><p class="text-gray-400 text-sm">hello@trendhive.com<br>+1 (555) 678-1234<br>123 Trend Ave, NY 10001</p></div>
+                <div><h4 class="font-bold mb-3">Follow Us</h4><div class="flex space-x-4 text-2xl"><a href="#" class="hover:text-gray-300">📘</a><a href="#" class="hover:text-gray-300">📸</a><a href="#" class="hover:text-gray-300">🐦</a></div></div>
+            </div>
+            <div class="border-t border-gray-800 mt-6 pt-4 text-center text-gray-500 text-sm">© 2026 TREND HIVE STORE — All rights reserved.</div>
+        </footer>
+    </main>
+
+    <script>
+        // --- Slider Logic (Video + Image) ---
+        let currentIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const wrapper = document.getElementById('slidesWrapper');
+        const dotsContainer = document.getElementById('dotsContainer');
+        let totalSlides = slides.length;
+
+        // Create dots
+        function createDots() {
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === currentIndex) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateDots() {
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                if (i === currentIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function goToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            currentIndex = index;
+            wrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+            updateDots();
+            // Handle video play/pause
+            slides.forEach((slide, i) => {
+                const video = slide.querySelector('video');
+                if (video) {
+                    if (i === currentIndex) {
+                        video.muted = true;
+                        video.play().catch(e => console.log("Autoplay prevented", e));
+                    } else {
+                        video.pause();
+                    }
+                }
+            });
+        }
+
+        function nextSlide() {
+            if (currentIndex < totalSlides - 1) goToSlide(currentIndex + 1);
+            else goToSlide(0);
+        }
+        function prevSlide() {
+            if (currentIndex > 0) goToSlide(currentIndex - 1);
+            else goToSlide(totalSlides - 1);
+        }
+
+        // Initialize slider
+        createDots();
+        goToSlide(0);
+
+        // Optional auto slide every 5 seconds (but keep smooth)
+        let autoSlide = setInterval(() => { nextSlide(); }, 6000);
+        const container = document.querySelector('.slider-container');
+        container.addEventListener('mouseenter', () => clearInterval(autoSlide));
+        container.addEventListener('mouseleave', () => { autoSlide = setInterval(() => nextSlide(), 6000); });
+
+        // --- Modal functions (same as before) ---
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('hidden');
+            document.getElementById(type + 'Modal').classList.add('flex');
+        }
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.add('hidden');
+            document.getElementById(type + 'Modal').classList.remove('flex');
+        }
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                alert('Logged in as ' + data.user.name);
+                closeModal('login');
+                location.reload();
+            } else alert('Login failed');
+        }
+        async function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const res = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Account created! Please login.');
+                closeModal('signup');
+            } else alert('Signup failed');
+        }
+        async function loadDeliveries() {
+            const res = await fetch('/api/orders');
+            const orders = await res.json();
+            const container = document.getElementById('recentDeliveries');
+            if (container) {
+                container.innerHTML = orders.slice(0, 6).map(order => `
+                    <div class="flex items-center gap-4 border-b pb-3">
+                        <img src="${order.productImage}" class="w-16 h-16 object-cover rounded-md">
+                        <div class="flex-1">
+                            <p class="font-bold">${order.productName}</p>
+                            <p class="text-sm text-gray-500">Delivered to ${order.customerName} • ${new Date(order.createdAt).toLocaleDateString()}</p>
+                            <p class="text-sm italic">"${order.comment}"</p>
+                            <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">${order.status}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        loadDeliveries();
+    </script>
+</body>
+</html>

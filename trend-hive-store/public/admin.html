@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin | TREND HIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #f0f0f0; }
+        .admin-card { background: white; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between">
+            <span class="text-2xl font-bold">🐝 TREND HIVE ADMIN</span>
+            <div class="space-x-4">
+                <a href="/" class="hover:text-gray-600">Home</a>
+                <a href="/products.html">Products</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <!-- Add Product Form -->
+        <div class="admin-card p-6">
+            <h2 class="text-2xl font-bold mb-4">➕ Add New Product</h2>
+            <form id="addProductForm" class="grid md:grid-cols-2 gap-4">
+                <input type="text" id="name" placeholder="Name" required class="border p-2 rounded">
+                <input type="number" id="price" placeholder="Price (USD)" required class="border p-2 rounded">
+                <input type="text" id="category" placeholder="Category" class="border p-2 rounded">
+                <input type="text" id="image" placeholder="Image URL" class="border p-2 rounded">
+                <textarea id="description" placeholder="Description" class="border p-2 rounded col-span-2"></textarea>
+                <input type="number" step="0.1" id="rating" placeholder="Rating (0-5)" class="border p-2 rounded">
+                <button type="submit" class="bg-black text-white py-2 rounded col-span-2">Create Product</button>
+            </form>
+        </div>
+
+        <!-- Manage Products List -->
+        <div class="admin-card p-6">
+            <h2 class="text-2xl font-bold mb-4">📦 Manage Products (CRUD)</h2>
+            <div id="adminProductList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+        </div>
+
+        <!-- Delivery Management -->
+        <div class="admin-card p-6">
+            <h2 class="text-2xl font-bold mb-4">🚚 Delivery Management</h2>
+            <div id="ordersList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-gray-500">Admin Panel – Full control</footer>
+
+    <script>
+        // Product CRUD
+        async function fetchProducts() {
+            const res = await fetch('/api/products');
+            const products = await res.json();
+            const container = document.getElementById('adminProductList');
+            container.innerHTML = products.map(p => `
+                <div class="border p-3 rounded flex justify-between items-center">
+                    <div><strong>${p.name}</strong><br>$${p.price} | ⭐${p.rating}</div>
+                    <div class="space-x-2">
+                        <button onclick="editProduct(${p.id})" class="bg-blue-600 text-white px-3 py-1 rounded">Edit</button>
+                        <button onclick="deleteProduct(${p.id})" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newProduct = {
+                name: document.getElementById('name').value,
+                price: parseFloat(document.getElementById('price').value),
+                category: document.getElementById('category').value,
+                image: document.getElementById('image').value,
+                description: document.getElementById('description').value,
+                rating: parseFloat(document.getElementById('rating').value)
+            };
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newProduct)
+            });
+            alert('Product added');
+            fetchProducts();
+            e.target.reset();
+        });
+
+        window.editProduct = async (id) => {
+            const newName = prompt("New name:");
+            const newPrice = prompt("New price (USD):");
+            if (newName && newPrice) {
+                await fetch(`/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName, price: parseFloat(newPrice) })
+                });
+                fetchProducts();
+            }
+        };
+
+        window.deleteProduct = async (id) => {
+            if (confirm("Delete product?")) {
+                await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                fetchProducts();
+            }
+        };
+
+        // Delivery Management (fetch orders, update status)
+        async function fetchOrders() {
+            const res = await fetch('/api/orders');
+            const orders = await res.json();
+            const container = document.getElementById('ordersList');
+            container.innerHTML = orders.map(order => `
+                <div class="border p-4 rounded bg-white shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p><strong>${order.productName}</strong> - $${order.productId ? '...' : ''}</p>
+                            <p class="text-sm">Customer: ${order.customerName} (${order.userEmail})</p>
+                            <p class="text-sm italic">"${order.comment}"</p>
+                            <p class="text-xs text-gray-500">Ordered: ${new Date(order.createdAt).toLocaleString()}</p>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <select id="status-${order.id}" class="border p-1 rounded" onchange="updateStatus(${order.id}, this.value)">
+                                <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                            <span class="text-xs mt-1">Current: ${order.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.updateStatus = async (orderId, newStatus) => {
+            await fetch(`/api/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            alert('Delivery status updated');
+            fetchOrders();
+        };
+
+        fetchProducts();
+        fetchOrders();
+    </script>
+</body>
+</html>
